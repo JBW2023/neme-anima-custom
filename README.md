@@ -1,4 +1,7 @@
-# Neme-Anima
+# Neme-Anima (Custom Version)
+
+> ⚠️ This is a personal custom version of [negaga53/neme-anima](https://github.com/negaga53/neme-anima) with some tweaks.
+> For the original project, visit the link above.
 
 A three-step character LoRA builder:
 
