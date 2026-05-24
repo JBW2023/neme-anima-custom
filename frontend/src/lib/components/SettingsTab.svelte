@@ -82,8 +82,10 @@
           help: "CCIP distance below which two crops are considered duplicates. Always-on dedup runs between identify and tag — this knob just tunes how aggressive it is. Default 0.02 only collapses near-pixel-identical crops; well below the 0.15 same-character threshold so different poses survive." },
         { name: "lookback_frames", type: "number", placeholder: "1000",
           help: "Maximum frame_idx delta between two crops for them to be duplicate-eligible. Restricts dedup to a sliding temporal window so visually similar but temporally distant shots stay distinct. Default 1000 ≈ 40 seconds at 24 fps. 0 = compare across the whole video (legacy)." },
-        { name: "move_to_rejected", type: "boolean", placeholder: "true",
-          help: "When on, duplicates move to rejected/ so you can recover them. Off = duplicates are deleted outright." },
+        	{  name: "move_to_rejected", type: "boolean", placeholder: "true",
+         	     help: "When on, duplicates move to rejected/ so you can recover them. Off = duplicates are deleted outright." },
+       	{ name: "embed_batch_size", type: "number", placeholder: "64",
+                          help: "Crops per GPU forward pass during embedding. Lower = less VRAM usage but slower. Lower this if dedup is exhausting your GPU memory. Default 256 may crash low-VRAM cards; try 64 or 32 for safer operation." },
       ]},
   ];
 

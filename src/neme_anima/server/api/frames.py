@@ -124,7 +124,7 @@ async def list_frames(
     query: str | None = Query(None),
     character_slug: str | None = Query(None),
     offset: int = Query(0),
-    limit: int = Query(500),
+    limit: int = Query(5000),
 ) -> dict:
     project = _load(request, slug)
     log = MetadataLog(project.metadata_path)
@@ -143,6 +143,42 @@ async def list_frames(
         if rec.filename.endswith(CROP_SUFFIX):
             continue
         by_filename[rec.filename] = rec
+
+    # Also scan kept_dir for PNG files that have no metadata record yet —
+    # this happens when the user manually drops PNGs into the folder
+    # bypassing the upload endpoint. Synthesize minimal records for them
+    # so they show up in the UI.
+    if kept_only and project.kept_dir.exists():
+        # Only show orphan files when no specific source filter is applied,
+        # or when the source filter matches the synthetic CUSTOM_VIDEO_STEM.
+        if source is None or source == CUSTOM_VIDEO_STEM:
+            default_slug = project.characters[0].slug if project.characters else "default"
+            for png_path in project.kept_dir.iterdir():
+                if not png_path.is_file() or png_path.suffix != ".png":
+                    continue
+                stem = png_path.stem
+                if stem.endswith(CROP_SUFFIX):
+                    continue
+                if stem in by_filename:
+                    continue
+                # Create a synthetic record for this orphan file so it
+                # shows up in the UI alongside extracted frames.
+                by_filename[stem] = FrameRecord(
+                    filename=stem,
+                    kept=True,
+                    scene_idx=0,
+                    tracklet_id=0,
+                    frame_idx=0,
+                    timestamp_seconds=0.0,
+                    bbox=(0, 0, 0, 0),
+                    ccip_distance=0.0,
+                    sharpness=0.0,
+                    visibility=0.0,
+                    aspect=1.0,
+                    score=0.0,
+                    video_stem=CUSTOM_VIDEO_STEM,
+                    character_slug=default_slug,
+                )
 
     kept_dir = project.kept_dir
     rejected_dir = project.rejected_dir
